@@ -1,0 +1,16 @@
+---
+- name: Patch Ansible Inventory File
+  become: true
+  hosts: all
+
+  tasks:
+      # sudo apt update
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+
+      # sudo apt upgrade -y
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: dist
+      register: upgrade_result
