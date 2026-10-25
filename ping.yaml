@@ -1,0 +1,17 @@
+--- 
+- name: Check the Ping Response
+  hosts: all
+  tasks:
+    - name: Run ping 
+      ansible.builtin.ping:
+      
+
+      
+
+
+      
+
+        
+
+
+ 
