@@ -2,9 +2,102 @@
 - name: Install Prometheus via Script
   hosts: prd-prometheus
   become: true
+  tags: prometheus
   vars:
     remote_dir: "/opt/scripts"
     installation_script: "prometheus_installation.sh"
+    local_dir: "scripts"
+    helper_scripts: [lib.sh]
+
+  tasks:
+    # Task 1: Create remote dir using builtin.file
+    - name: Create remote directory
+      ansible.builtin.file:
+        path: "{{ remote_dir }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    # Task 2: Copy Scripts
+    - name: Copy installation script
+      ansible.builtin.copy:
+        src: "{{ local_dir }}/{{ item }}"
+        dest: "{{ remote_dir }}/{{ item }}"
+        mode: '0755'
+        owner: root
+        group: root
+      loop: "{{[installation_script] + helper_scripts }}"
+
+    # Task 3: Run script command
+    - name: Run script command
+      ansible.builtin.command: 
+        cmd: "bash ./{{ installation_script }}"
+      args:
+        chdir: "{{ remote_dir }}"
+      register: installation_script_output
+      changed_when: true
+
+    # Task 4: Print Script output
+    - name: Print script output
+      ansible.builtin.debug:
+        var: installation_script_output.stdout_lines
+ 
+
+- name: Deploy node exporter via Script
+  hosts:
+    - prd-prometheus
+    - prd
+  tags: node_exporter
+  become: true
+  vars:
+    remote_dir: "/opt/scripts"
+    installation_script: "node_exporter.sh"
+    local_dir: "scripts"
+    helper_scripts: [lib.sh]
+
+  tasks:
+    # Task 1: Create remote dir using builtin.file
+    - name: Create remote directory
+      ansible.builtin.file:
+        path: "{{ remote_dir }}"
+        state: directory
+        mode: '0755'
+        owner: root
+        group: root
+
+    # Task 2: Copy Scripts
+    - name: Copy installation script
+      ansible.builtin.copy:
+        src: "{{ local_dir }}/{{ item }}"
+        dest: "{{ remote_dir }}/{{ item }}"
+        mode: '0755'
+        owner: root
+        group: root
+      loop: "{{[installation_script] + helper_scripts }}"
+
+    # Task 3: Run script command
+    - name: Run script command
+      ansible.builtin.command: 
+        cmd: "bash ./{{ installation_script }}"
+      args:
+        chdir: "{{ remote_dir }}"
+      register: installation_script_output
+      changed_when: true
+
+    # Task 4: Print Script output
+    - name: Print script output
+      ansible.builtin.debug:
+        var: installation_script_output.stdout_lines
+ 
+
+- name: Deploy nginx via Script
+  hosts: prd
+  tags: nginx_exporter
+  become: true
+  vars:
+    remote_dir: "/opt/scripts"
+    installation_script: "nginx_exporter.sh"
     local_dir: "scripts"
     helper_scripts: [lib.sh]
 
